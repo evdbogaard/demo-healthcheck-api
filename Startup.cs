@@ -32,15 +32,19 @@ namespace Demo.HealthCheck.Api
 
             services
                 .AddApplicationInsightsTelemetry(Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"])
-                .AddSingleton<HealthService>()
+                .AddSingleton<MyHealthService>();
+
+            services
                 .AddHealthChecks()
-                .AddCosmosDb(Configuration["CosmosDbConnString"], "master")
-                .AddCheck<CustomCheck>(nameof(CustomCheck));
+                 .AddCosmosDb(Configuration["CosmosDbConnString"], "master", "CosmosDb", tags: new[] { "startup" })
+                 .AddCheck<CustomCheck>(nameof(CustomCheck))
+                 .AddExternalApiCheck("My first external api", "https://demo-healthceck-external-api.azurewebsites.net/")
+                 .AddExternalApiCheck("My second external api", "https://demo-healthceck-external-api-2.azurewebsites.net/");
 
             services
                 .AddHealthChecksUI(options =>
                 {
-                    options.AddHealthCheckEndpoint("Healthcheck API", "/hc");
+                    options.AddHealthCheckEndpoint("Healthcheck API", "/hc/live");
                 })
                 .AddInMemoryStorage();
         }
@@ -64,11 +68,24 @@ namespace Demo.HealthCheck.Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/hc", new HealthCheckOptions
+
+                endpoints.MapHealthChecks("/hc");
+
+                endpoints.MapHealthChecks("/hc/live", new HealthCheckOptions
                 {
+                    Predicate = (check) => !check.Tags.Contains("startup"),
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
                 });
-                endpoints.MapHealthChecksUI(options => options.UIPath = "/hc-ui");
+
+                endpoints.MapHealthChecks("/hc/ready", new HealthCheckOptions
+                {
+                    Predicate = (check) => check.Tags.Contains("startup")
+                });
+
+                endpoints.MapHealthChecksUI(options =>
+                {
+                    options.UIPath = "/hc-ui";
+                });
             });
         }
     }

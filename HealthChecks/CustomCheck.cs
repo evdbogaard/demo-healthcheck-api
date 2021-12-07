@@ -7,13 +7,21 @@ namespace Demo.HealthCheck.Api.HealthChecks
 {
     public class CustomCheck : IHealthCheck
     {
-        readonly HealthService _healthService;
+        readonly MyHealthService _healthService;
 
-        public CustomCheck(HealthService healthService) => _healthService = healthService;
+        public CustomCheck(MyHealthService healthService) => _healthService = healthService;
 
         public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
-            => _healthService.Healthy
-                ? Task.FromResult(HealthCheckResult.Healthy())
-                : Task.FromResult(HealthCheckResult.Unhealthy());
+        {
+            switch(_healthService.Status)
+            {
+                case 1:
+                    return Task.FromResult(HealthCheckResult.Degraded());
+                case 2:
+                    return Task.FromResult(HealthCheckResult.Unhealthy());
+                default:
+                    return Task.FromResult(HealthCheckResult.Healthy());
+            };
+        }
     }
 }

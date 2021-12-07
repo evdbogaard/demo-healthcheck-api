@@ -8,11 +8,23 @@ namespace Demo.HealthCheck.Api.Controllers
     [Route("[controller]")]
     public class HealthController : ControllerBase
     {
-        readonly HealthService _healthService;
+        readonly MyHealthService _healthService;
 
-        public HealthController(HealthService healthService, IConfiguration configuration) => _healthService = healthService;
+        public HealthController(MyHealthService healthService, IConfiguration configuration) => _healthService = healthService;
+
+        [HttpGet("/")]
+        public IActionResult MainGet() => Ok("Hello world");
 
         [HttpGet]
         public void Get() => _healthService.Healthy = !_healthService.Healthy;
+
+        [HttpGet("SetHealthy")]
+        public void SetHealthy() => _healthService.Status = 0;
+
+        [HttpGet("SetDegraded")]
+        public void SetDegraded() => _healthService.Status = 1;
+
+        [HttpGet("SetUnhealthy")]
+        public void SetUnhealthy() => _healthService.Status = 2;
     }
 }

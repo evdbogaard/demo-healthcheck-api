@@ -1,7 +1,8 @@
 namespace Demo.HealthCheck.Api.Integration
 {
-    public class HealthService
+    public class MyHealthService
     {
         public bool Healthy { get; set; } = true;
+        public int Status { get; set; }
     }
 }
