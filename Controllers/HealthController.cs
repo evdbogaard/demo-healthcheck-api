@@ -1,6 +1,4 @@
-using Demo.HealthCheck.Api.Integration;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace Demo.HealthCheck.Api.Controllers
 {
